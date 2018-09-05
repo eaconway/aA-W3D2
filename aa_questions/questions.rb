@@ -143,16 +143,13 @@ class User
   def average_karma
     data = QuestionDatabase.instance.execute(<<-SQL, @id)
       SELECT
-        questions.id
+        COUNT(DISTINCT questions.id), COUNT(question_likes.questions_id) AS likes
       FROM
         questions
-      JOIN
+      LEFT JOIN
         question_likes ON questions.id = question_likes.questions_id
       WHERE
-        questions_id IN (SELECT id FROM questions WHERE author_id = 2)
-      GROUP BY
-        questions.id
-
+        questions.id IN (SELECT id FROM questions WHERE author_id = ?)
     SQL
     data.map {|info| User.new(info)}
   end
